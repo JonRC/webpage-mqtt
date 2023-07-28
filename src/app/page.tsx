@@ -1,95 +1,55 @@
-import Image from 'next/image'
+'use client'
+
+//Lotei os arquivos de comentários para fins didáticos, sinta-se a vontade para removê-los
+
+import { Metric } from '@/components/Metric'
 import styles from './page.module.css'
+import * as mqtt from 'mqtt'
+import { useEffect, useState } from 'react'
+
+const TEMPERATURE_TOPIC = 'esp32/temperature'
+const HUMIDITY_TOPIC = 'esp32/humidity'
 
 export default function Home() {
+
+  const [metrics, setMetrics] = useState({ //Cria o state metrics. setMetrics é usado para atualizar metrics.
+    temperature: '', //valor inicial da temperature, string vazia
+    humidity: '' //valor inicial da humidade, string vazia
+  })
+
+  useEffect(() => {
+    const client = mqtt.connect('ws://localhost:8080') //connecta ao mqtt broker
+    client.on('connect', handleConnection) //Ao conectar chama a função `handleConnection`
+
+    function handleConnection () {
+      client.subscribe(TEMPERATURE_TOPIC) //Escuta o tópico de temperatura
+      client.subscribe(HUMIDITY_TOPIC) //Escuta o tópico de humidade
+
+      client.on('message', (topic, message) => { //Ao recebem mensagem, executa essa função que recebe a mensagem que e seu topico
+        if(topic === TEMPERATURE_TOPIC) setMetrics(metrics => ({ //atualiza metrics para
+          ...metrics, //usa os valores já existentes
+          temperature: message.toString() //altera o valor da temperatura
+        }))
+
+        debugger
+
+        if(topic === HUMIDITY_TOPIC) setMetrics(metrics => ({
+          ...metrics, //usa os valores já existentes
+          humidity: message.toString() //altera o valor da humidade
+        }))
+      })
+    }
+  }, [])
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+      <Metric title='Temperature'> {/* Usa o componente Metric passando o título */}
+        {metrics.temperature} {/* Conteúdo do componente Metric */}
+      </Metric>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      <Metric title='Humidity'>
+        {metrics.humidity}
+      </Metric>
     </main>
   )
 }
