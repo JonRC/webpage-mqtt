@@ -1,11 +1,17 @@
 # Webpage MQTT
 
-A NextJs webpage to listen a topic from a MQTT Broker and show messages from there in realtime.  
+*Translations: [Português](/translation/README.pt-br.md)*
 
-I recommend you fork this project or just use this as an example.
+## About
+
+A NextJs webpage to listen a topic from a MQTT Broker and show their messages in realtime.  
+
+I recommend you fork this project or use it as an example.
+
+## Running
 
 ```bash
-#insatall depedencies
+#install dependencies
 npm install
 
 #run project
@@ -13,4 +19,5 @@ npm run dev
 ```
 ## Print
 ![print](/assets/print.png)
+
 
